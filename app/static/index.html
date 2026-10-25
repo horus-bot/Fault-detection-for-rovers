@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>BearingSense | Predictive maintenance</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7"></script>
+  <style>
+    :root { --bg:#09111f; --panel:#111d2e; --line:#24354a; --muted:#8ea1b8; --text:#f1f6fb; --mint:#5eead4; --blue:#70a6ff; --orange:#ffb86b; --red:#ff7f87; }
+    * { box-sizing:border-box; } body { margin:0; color:var(--text); background:radial-gradient(circle at 85% 0%,#173355 0,#09111f 42%); font-family:Manrope, sans-serif; min-height:100vh; }
+    .shell { max-width:1300px; margin:auto; padding:34px 28px 54px; } .topbar { display:flex; justify-content:space-between; align-items:center; margin-bottom:56px; }
+    .brand { display:flex; align-items:center; gap:12px; font-weight:800; letter-spacing:-.04em; font-size:20px; } .mark { width:34px; height:34px; display:grid; place-items:center; border:1px solid #416b83; border-radius:11px; color:var(--mint); background:#0e2736; }
+    .status { color:var(--muted); font:12px "DM Mono", monospace; display:flex; gap:8px; align-items:center; } .dot { background:var(--mint); width:7px; height:7px; border-radius:50%; box-shadow:0 0 12px var(--mint); }
+    .hero { max-width:730px; margin-bottom:34px; } .eyebrow { color:var(--mint); text-transform:uppercase; letter-spacing:.18em; font:11px "DM Mono", monospace; margin-bottom:17px; }
+    h1 { margin:0; font-size:clamp(36px,5vw,66px); line-height:1.02; letter-spacing:-.065em; } .hero p { color:var(--muted); max-width:610px; font-size:16px; line-height:1.7; margin:20px 0 0; }
+    .layout { display:grid; grid-template-columns:340px 1fr; gap:20px; align-items:start; } .panel { background:rgba(17,29,46,.84); border:1px solid var(--line); border-radius:20px; padding:22px; box-shadow:0 18px 50px #02081744; }
+    .panel h2 { font-size:14px; margin:0 0 6px; } .hint { color:var(--muted); font-size:12px; line-height:1.5; margin:0 0 22px; }
+    label { display:block; color:var(--muted); font:11px "DM Mono", monospace; text-transform:uppercase; letter-spacing:.08em; margin:19px 0 8px; } select,input[type=file] { width:100%; background:#0b1625; border:1px solid var(--line); color:var(--text); border-radius:10px; padding:12px; font:13px Manrope,sans-serif; }
+    input[type=file] { color:var(--muted); font-size:11px; } button { width:100%; cursor:pointer; border:0; border-radius:10px; padding:13px; font-weight:800; color:#062220; background:var(--mint); margin-top:20px; transition:transform .2s,filter .2s; } button:hover { filter:brightness(1.08); transform:translateY(-1px); } button:disabled { opacity:.6; cursor:wait; transform:none; }
+    .results { display:grid; gap:20px; } .result-head { display:flex; align-items:flex-start; justify-content:space-between; gap:16px; } .result-label { font-size:30px; font-weight:800; letter-spacing:-.05em; margin:2px 0 5px; } .source { color:var(--muted); font:11px "DM Mono", monospace; }
+    .confidence { text-align:right; } .confidence strong { display:block; font-size:30px; color:var(--mint); letter-spacing:-.06em; } .confidence span { color:var(--muted); font:10px "DM Mono", monospace; text-transform:uppercase; }
+    .explanation { border-left:2px solid var(--mint); background:#132838; border-radius:0 10px 10px 0; padding:13px 15px; color:#c5d4e4; line-height:1.6; font-size:13px; margin-top:20px; }
+    .chart-card { min-height:280px; } .card-title { color:var(--muted); font:11px "DM Mono", monospace; text-transform:uppercase; letter-spacing:.1em; margin-bottom:15px; } .chart-wrap { height:230px; position:relative; }
+    .lower { display:grid; grid-template-columns:1.25fr .75fr; gap:20px; } .metrics { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; } .metric { padding:14px; background:#0c1828; border:1px solid #1d2e43; border-radius:12px; } .metric b { display:block; font:18px "DM Mono",monospace; margin-bottom:5px; } .metric span { color:var(--muted); font-size:10px; }
+    .empty { min-height:460px; display:grid; place-items:center; color:var(--muted); text-align:center; } .empty strong { display:block; color:var(--text); font-size:17px; margin-bottom:8px; } .error { color:var(--red); font-size:12px; margin-top:13px; line-height:1.5; }
+    @media(max-width:850px) { .layout,.lower { grid-template-columns:1fr; } .topbar { margin-bottom:36px; } .shell { padding:24px 16px 40px; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar"><div class="brand"><span class="mark">∿</span> BearingSense</div><div class="status"><i class="dot"></i> MODEL ONLINE · CPU INFERENCE</div></header>
+    <section class="hero"><div class="eyebrow">Condition intelligence / 01</div><h1>Understand the signal<br><span style="color:var(--mint)">before failure.</span></h1><p>Explore vibration windows from the trained CWRU dataset or upload a 1,024-point signal. BearingSense turns raw vibration into an explainable health assessment.</p></section>
+    <section class="layout">
+      <aside class="panel">
+        <h2>Signal input</h2><p class="hint">The CNN expects one normalized vibration window with exactly 1,024 points.</p>
+        <label for="sample">Dataset window</label><select id="sample"></select>
+        <label for="file">Or upload signal</label><input id="file" type="file" accept=".npy,.csv,.txt,.mat">
+        <button id="analyze">Analyze signal <span>→</span></button><div id="error" class="error"></div>
+      </aside>
+      <div id="output" class="results"><div class="panel empty"><div><strong>Ready when you are</strong>Select a dataset window or upload your own signal<br>to see the model's assessment.</div></div></div>
+    </section>
+  </main>
+  <script>
+    const sample = document.querySelector('#sample'), file = document.querySelector('#file'), button = document.querySelector('#analyze'), output = document.querySelector('#output'), error = document.querySelector('#error');
+    let waveformChart, probabilityChart;
+    const colors = ['#5eead4','#70a6ff','#ffb86b','#ff7f87'];
+    async function loadSamples() {
+      const response = await fetch('/api/samples'); const data = await response.json();
+      sample.innerHTML = data.samples.map(item => `<option value="${item.index}">#${String(item.index + 1).padStart(4,'0')} · ${item.source}</option>`).join('');
+    }
+    function chartOptions() { return { responsive:true, maintainAspectRatio:false, plugins:{legend:{display:false}}, scales:{x:{display:false},y:{grid:{color:'#203149'},ticks:{color:'#71849c',font:{size:10}}}}}; }
+    function render(data) {
+      output.innerHTML = `<div class="panel"><div class="result-head"><div><div class="eyebrow" style="margin-bottom:10px">Assessment complete</div><div class="result-label">${data.prediction.label}</div><div class="source">${data.source || 'Custom signal'} · ${data.window_size} points</div></div><div class="confidence"><strong>${(data.prediction.confidence*100).toFixed(1)}%</strong><span>confidence</span></div></div><div class="explanation">${data.explanation}</div></div>
+      <div class="panel chart-card"><div class="card-title">Vibration waveform · time domain</div><div class="chart-wrap"><canvas id="waveform"></canvas></div></div>
+      <div class="lower"><div class="panel chart-card"><div class="card-title">Model confidence by class</div><div class="chart-wrap"><canvas id="probability"></canvas></div></div><div class="panel"><div class="card-title">Signal fingerprint</div><div class="metrics">${[['rms','RMS'],['std','Std deviation'],['peak_to_peak','Peak-to-peak'],['crest_factor','Crest factor'],['mean','Mean']].map(([key,label])=>`<div class="metric"><b>${data.stats[key].toFixed(3)}</b><span>${label}</span></div>`).join('')}</div></div></div>`;
+      waveformChart = new Chart(document.querySelector('#waveform'), {type:'line',data:{labels:data.signal.map((_,i)=>i),datasets:[{data:data.signal,borderColor:'#5eead4',borderWidth:1.2,pointRadius:0,fill:true,backgroundColor:'#5eead411',tension:.15}]},options:chartOptions()});
+      probabilityChart = new Chart(document.querySelector('#probability'), {type:'bar',data:{labels:data.probabilities.map(item=>item.label),datasets:[{data:data.probabilities.map(item=>item.value*100),backgroundColor:colors,borderRadius:6,barThickness:24}]},options:{...chartOptions(),indexAxis:'y',scales:{x:{max:100,grid:{color:'#203149'},ticks:{color:'#71849c',callback:value=>value+'%'}},y:{grid:{display:false},ticks:{color:'#b5c4d5',font:{size:10}}}}}});
+    }
+    async function analyze() {
+      error.textContent=''; button.disabled=true; button.textContent='Analyzing…';
+      try { let response, options;
+        if (file.files[0]) { const body=new FormData(); body.append('file',file.files[0]); response=await fetch('/api/predict-file',{method:'POST',body}); }
+        else { options={method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sample_index:Number(sample.value)})}; response=await fetch('/api/predict',options); }
+        const data=await response.json(); if(!response.ok) throw new Error(data.detail || 'The signal could not be analyzed.'); render(data);
+      } catch (e) { error.textContent=e.message; } finally { button.disabled=false; button.innerHTML='Analyze signal <span>→</span>'; }
+    }
+    file.addEventListener('change',()=>{ if(file.files[0]) sample.disabled=true; else sample.disabled=false; }); button.addEventListener('click',analyze); loadSamples().catch(e=>error.textContent=e.message);
+  </script>
+</body>
+</html>
